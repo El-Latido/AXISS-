@@ -1,15 +1,102 @@
-#axiss-avatar {
-    width: 35px;
-    height: 35px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #00ffd5, #00443a);
-    cursor: pointer;
-    border: 2px solid #1a242f;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    margin-left: auto; /* Lo empuja a la derecha */
+:root {
+    --bg-dark: #05070a;
+    --accent: #00ffd5; /* Cian tecnológico */
+    --accent-dim: rgba(0, 255, 213, 0.15);
+    --text-main: #a0b0b0;
+    --glass: rgba(10, 15, 20, 0.8);
 }
 
-#axiss-avatar:hover {
-    transform: scale(1.1);
-    box-shadow: 0 0 15px var(--accent);
+body {
+    background-color: var(--bg-dark);
+    color: var(--text-main);
+    font-family: 'Fira Code', monospace;
+    margin: 0;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Header Estilo Heli pero en Cian */
+header {
+    background: var(--glass);
+    border-bottom: 1px solid #1a242f;
+    padding: 10px 20px;
+    z-index: 10;
+}
+
+.status-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 11px;
+    letter-spacing: 1px;
+}
+
+.node-info { color: var(--accent); font-weight: bold; }
+
+#axiss-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), #00443a);
+    cursor: pointer;
+    box-shadow: 0 0 10px var(--accent-dim);
+    border: 2px solid #1a242f;
+    transition: 0.3s;
+}
+
+#axiss-avatar:hover { transform: rotate(90deg) scale(1.1); box-shadow: 0 0 15px var(--accent); }
+
+/* Área de Chat */
+#chat-container {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    background: radial-gradient(circle at center, #0a0f14 0%, #05070a 100%);
+}
+
+.line {
+    max-width: 85%;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.system-msg { border-left: 2px solid var(--accent); background: var(--accent-dim); color: #fff; }
+.user-msg { align-self: flex-end; color: var(--accent); border-right: 2px solid var(--accent); text-align: right; }
+
+/* Barra de Entrada de Texto */
+.input-wrapper {
+    background: #0a0f14;
+    padding: 15px 25px;
+    display: flex;
+    align-items: center;
+    border-top: 1px solid #1a242f;
+}
+
+.prompt-char { color: var(--accent); margin-right: 15px; font-weight: bold; }
+
+input {
+    background: transparent;
+    border: none;
+    outline: none;
+    color: #fff;
+    font-family: 'Fira Code', monospace;
+    font-size: 15px;
+    flex: 1;
+}
+
+/* Animaciones */
+.blink { animation: blink 1.2s infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+
+.scanline {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: linear-gradient(to bottom, transparent 50%, rgba(0, 255, 213, 0.02) 50%);
+    background-size: 100% 4px;
+    z-index: 100; pointer-events: none;
 }
