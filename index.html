@@ -1,7 +1,33 @@
-<header>
-    <div class="status-bar">
-        <span>ID: AXISS_01</span>
-        <span class="blink">● ONLINE</span>
-        <div id="axiss-avatar" onclick="configurarToken()" title="Configurar API Key"></div>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AXISS v1.0 [ARCHITECT_CORE]</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;500&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="scanline"></div>
+    
+    <header>
+        <div class="status-bar">
+            <div class="node-info">ID: AXISS_01 <span class="blink">● ONLINE</span></div>
+            <div class="engine-info">ENGINE: GEMINI 2.5 FLASH</div>
+            <div id="axiss-avatar" onclick="configurarToken()" title="Configurar API Key"></div>
+        </div>
+    </header>
+
+    <main id="chat-container">
+        <div class="line system-msg">AXISS Kernel v1.0.7 loaded...</div>
+        <div class="line system-msg">Esperando instrucciones de arquitectura, Fabián.</div>
+    </main>
+
+    <div class="input-wrapper">
+        <span class="prompt-char">AXISS@CORE:~$</span>
+        <input type="text" id="user-input" placeholder="Escribe un comando o consulta técnica..." autofocus autocomplete="off">
     </div>
-</header>
+
+    <script src="main.js"></script>
+</body>
+        </html>
