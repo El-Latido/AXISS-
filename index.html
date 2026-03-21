@@ -1,33 +1,7 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>AXISS v1.0 [ARCHITECT_CORE]</title>
-    <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Fira+Code&display=swap" rel="stylesheet">
-</head>
-<body>
-    <div class="scanline"></div>
-    <header>
-        <div class="status-bar">
-            <span>ID: AXISS_01</span>
-            <span>OS: ARCHITECT_OS</span>
-            <span class="blink">● ONLINE</span>
-        </div>
-    </header>
-
-    <main id="terminal">
-        <div class="line">AXISS Kernel v1.0.7 loaded...</div>
-        <div class="line">User: FABIAN_VISIONARY detected.</div>
-        <div class="line">Sincronizando con HELIZABETH... [WAITING]</div>
-        <div class="line">Listo para orquestar la infraestructura.</div>
-    </main>
-
-    <div class="input-area">
-        <span class="prompt">AXISS@CORE:~$</span>
-        <input type="text" id="user-input" autofocus autocomplete="off">
+<header>
+    <div class="status-bar">
+        <span>ID: AXISS_01</span>
+        <span class="blink">● ONLINE</span>
+        <div id="axiss-avatar" onclick="configurarToken()" title="Configurar API Key"></div>
     </div>
-
-    <script src="main.js"></script>
-</body>
-      </html>
+</header>
