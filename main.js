@@ -1,59 +1,61 @@
-// AXISS v1.0 - CORE INTELLIGENCE
 const terminal = document.getElementById('terminal');
 const input = document.getElementById('user-input');
 
-// CONFIGURACIÓN: Aquí pondrás tu API KEY (Igual que con Helizabeth)
+// Recuperar Token de AXISS
 let AXISS_TOKEN = localStorage.getItem('axiss_token');
 
-// Función para imprimir en la terminal con estilo
+// Función para el Avatar (Igual que Helizabeth)
+function configurarToken() {
+    const key = prompt("⚙️ AXISS CONFIG: Ingresa tu API Key de Gemini:", AXISS_TOKEN || "");
+    if (key) {
+        localStorage.setItem('axiss_token', key);
+        AXISS_TOKEN = key;
+        addLine("SISTEMA: API Key sincronizada correctamente.", 'system');
+    }
+}
+
 function addLine(text, type = 'system') {
     const div = document.createElement('div');
     div.className = 'line';
-    if (type === 'user') {
-        div.style.color = '#fff';
-        div.innerText = `FABIAN@VISIONARY:~$ ${text}`;
-    } else {
-        div.style.color = '#00ffd5';
-        div.innerText = `AXISS@ARCHITECT:~$ ${text}`;
-    }
+    div.style.color = (type === 'user') ? '#fff' : '#00ffd5';
+    div.innerText = (type === 'user') ? `FABIAN@VISIONARY:~$ ${text}` : `AXISS@ARCHITECT:~$ ${text}`;
     terminal.appendChild(div);
     terminal.scrollTop = terminal.scrollHeight;
 }
 
-// Escuchador de comandos
 input.addEventListener('keypress', async (e) => {
     if (e.key === 'Enter' && input.value.trim() !== "") {
         const prompt = input.value.trim();
         addLine(prompt, 'user');
         input.value = '';
-        
+
         if (!AXISS_TOKEN) {
-            addLine("ERROR: AXISS_TOKEN no detectado. Escribe 'SET_TOKEN [tu_key]' para inicializar.");
+            addLine("ERROR: Token no configurado. Toca el avatar cian para iniciar.", 'system');
             return;
         }
 
-        if (prompt.startsWith("SET_TOKEN ")) {
-            const key = prompt.split(" ")[1];
-            localStorage.setItem('axiss_token', key);
-            AXISS_TOKEN = key;
-            addLine("SISTEMA: Token actualizado y encriptado en local.");
-            return;
-        }
-
-        await fetchFromGemini(prompt);
+        await fetchFromAXISS(prompt);
     }
 });
 
-async function fetchFromGemini(prompt) {
-    addLine("PROCESANDO_ARQUITECTURA...", 'system');
-    
+async function fetchFromAXISS(prompt) {
+    // INDICADOR DE CARGA
+    const loadingId = "L-" + Date.now();
+    const loadingDiv = document.createElement('div');
+    loadingDiv.id = loadingId;
+    loadingDiv.className = 'line';
+    loadingDiv.style.color = '#00ffd5';
+    loadingDiv.innerText = "AXISS: Procesando arquitectura...";
+    terminal.appendChild(loadingDiv);
+
     const systemInstruction = `SISTEMA: AXISS v1.0. Eres un Arquitecto de Software Senior y experto en Backend/Seguridad. 
     Tu creador es Fabián. Tu colega es HELIZABETH (Frontend). 
     Tu tono es analítico, serio, eficiente y técnico. 
-    Te enfocas en: Bases de datos, APIs, Seguridad, Estructura de archivos y Optimización.
-    Si Fabián te pregunta algo de interfaz, menciónale que Helizabeth debería encargarse del diseño final.`;
+    Usa bloques de código para estructuras de datos o lógica de servidor. 
+    Si la respuesta es para Helizabeth, indícalo claramente.`;
 
     try {
+        // LLAMADA A GEMINI 2.5 FLASH
         const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${AXISS_TOKEN}`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -66,9 +68,30 @@ async function fetchFromGemini(prompt) {
         });
 
         const data = await response.json();
-        const reply = data.candidates[0].content.parts[0].text;
-        addLine(reply, 'system');
+        document.getElementById(loadingId).remove(); // Quitar loading
+
+        if (data.candidates && data.candidates[0].content.parts[0].text) {
+            const reply = data.candidates[0].content.parts[0].text;
+            addLine(reply, 'system');
+            
+            // Si AXISS menciona a Helizabeth, enviamos la señal al puente
+            if (reply.toLowerCase().includes("helizabeth")) {
+                enviarAHeli(reply);
+            }
+        }
     } catch (error) {
-        addLine("ERROR_CRÍTICO: Fallo en la sincronización con el núcleo Gemini.");
+        document.getElementById(loadingId).innerText = "ERROR_SYNC: Fallo en el núcleo 2.5 Flash.";
+        console.error(error);
     }
-                    }
+}
+
+// EL PUENTE (Transmisor)
+function enviarAHeli(mensaje) {
+    const señal = {
+        emisor: "AXISS",
+        timestamp: new Date().getTime(),
+        contenido: mensaje
+    };
+    localStorage.setItem('fusion_signal', JSON.stringify(señal));
+    addLine("[SIGNAL_SENT] Transmisión enviada a HELIZABETH.");
+}
