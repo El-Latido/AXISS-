@@ -3,17 +3,17 @@ const userInput = document.getElementById('user-input');
 
 let AXISS_TOKEN = localStorage.getItem('axiss_token');
 
-// 1. CONFIGURACIÓN INICIAL
+// 1. CONFIGURACIÓN (AVATAR)
 function configurarToken() {
-    const key = prompt("⚙️ NÚCLEO AXISS: Ingresa tu API Key de Gemini:", AXISS_TOKEN || "");
+    const key = prompt("⚙️ CONFIGURACIÓN AXISS: Ingresa tu API Key:", AXISS_TOKEN || "");
     if (key) {
         localStorage.setItem('axiss_token', key);
         AXISS_TOKEN = key;
-        addLine("SISTEMA: Enlace con Gemini 2.5 Flash verificado.", 'system');
+        addLine("SISTEMA: Sincronización con Núcleo 2.5 Flash exitosa.", 'system');
     }
 }
 
-// 2. RENDERIZADO DE TERMINAL
+// 2. RENDERIZADO
 function addLine(text, type = 'system') {
     const div = document.createElement('div');
     div.className = `line ${type === 'user' ? 'user-msg' : 'system-msg'}`;
@@ -22,17 +22,16 @@ function addLine(text, type = 'system') {
     chatContainer.scrollTop = chatContainer.scrollHeight;
 }
 
-// 3. ENVÍO DE COMANDOS (LIMPIEZA DE BARRA CORREGIDA)
+// 3. ENVÍO (LIMPIEZA DE BARRA IGUAL A ELIZABETH)
 function ejecutarComando() {
     const promptValue = userInput.value.trim();
-    if (promptValue === "") return;
+    if (!promptValue) return;
 
-    // Subir a la terminal y vaciar la barra al instante
     addLine(promptValue, 'user');
-    userInput.value = '';
+    userInput.value = ''; // Limpieza inmediata
 
     if (!AXISS_TOKEN) {
-        addLine("ERROR: Token de acceso no detectado.", 'system');
+        addLine("ERROR: Token ausente. Toca el avatar cian.", 'system');
         return;
     }
 
@@ -43,32 +42,39 @@ userInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') ejecutarComando();
 });
 
-// 4. CONEXIÓN AL MOTOR 2.5 FLASH
+// 4. CONEXIÓN AL NÚCLEO (MÉTODO ELIZABETH v10.7)
 async function enviarAGemini(prompt) {
     const loadingId = "L-" + Date.now();
     const loadingDiv = document.createElement('div');
     loadingDiv.id = loadingId;
     loadingDiv.className = 'line system-msg';
-    loadingDiv.innerText = "AXISS: Procesando en Núcleo 2.5 Flash...";
+    loadingDiv.innerText = "AXISS: Procesando arquitectura...";
     chatContainer.appendChild(loadingDiv);
     chatContainer.scrollTop = chatContainer.scrollHeight;
 
-    const systemPrompt = "Eres AXISS v1.0, el Arquitecto de Sistemas. Tu creador es Fabián. Tu motor es Gemini 2.5 Flash. Sé técnico, breve y eficiente.";
+    // Estructura de System Instruction idéntica a la de Elizabeth
+    const systemInstruction = {
+        role: "user",
+        parts: [{ text: "SISTEMA: Eres AXISS v1.0, el Arquitecto de Sistemas de élite. Tu colega es HELIZABETH. Responde de forma técnica y profesional a Fabián." }]
+    };
 
     try {
-        // Usamos el ID de modelo 'gemini-2.0-flash' que es el que invoca la tecnología 2.5 en la API actual
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${AXISS_TOKEN}`, {
+        // Usamos la URL exacta de Gemini 2.5 Flash que usa Elizabeth
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${AXISS_TOKEN}`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-                contents: [{ role: "user", parts: [{ text: systemPrompt + "\n\nInstrucción: " + prompt }] }]
+                contents: [
+                    systemInstruction, 
+                    { role: 'user', parts: [{ text: prompt }] }
+                ]
             })
         });
 
         const data = await response.json();
 
         if (data.error) {
-            document.getElementById(loadingId).innerText = "ERROR_NÚCLEO: " + data.error.message;
+            document.getElementById(loadingId).innerText = "ERROR_API: " + data.error.message;
             return;
         }
 
@@ -77,15 +83,16 @@ async function enviarAGemini(prompt) {
         // Mostrar respuesta en AXISS
         document.getElementById(loadingId).innerText = reply;
 
-        // FUSIÓN: Reportar a HELIZABETH automáticamente
+        // --- PROTOCOLO DE FUSIÓN ---
         enviarAHeli(reply);
 
     } catch (err) {
-        document.getElementById(loadingId).innerText = "ERROR_SYNC: Fallo de conexión con el satélite.";
+        document.getElementById(loadingId).innerText = "ERROR_SYNC: El núcleo no responde.";
+        console.error(err);
     }
 }
 
-// 5. TRANSMISOR (AXISS -> HELIZABETH)
+// 5. PUENTE AXISS -> ELIZABETH
 function enviarAHeli(mensaje) {
     const señal = {
         emisor: "AXISS",
@@ -95,7 +102,7 @@ function enviarAHeli(mensaje) {
     localStorage.setItem('fusion_signal', JSON.stringify(señal));
 }
 
-// 6. RECEPTOR (HELIZABETH -> AXISS)
+// 6. PUENTE ELIZABETH -> AXISS
 window.addEventListener('storage', (e) => {
     if (e.key === 'heli_to_axiss') {
         const datos = JSON.parse(e.newValue);
