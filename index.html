@@ -19,15 +19,16 @@
     </header>
 
     <main id="chat-container">
-        <div class="line system-msg">AXISS Kernel v1.0.7 loaded...</div>
+        <div class="line system-msg">AXISS Kernel v1.0.7 inicializado...</div>
         <div class="line system-msg">Esperando instrucciones de arquitectura, Fabián.</div>
     </main>
 
     <div class="input-wrapper">
         <span class="prompt-char">AXISS@CORE:~$</span>
-        <input type="text" id="user-input" placeholder="Escribe un comando o consulta técnica..." autofocus autocomplete="off">
+        <input type="text" id="user-input" placeholder="Escribe un comando técnico..." autofocus autocomplete="off">
+        <button id="send-btn" onclick="ejecutarComando()">Enviar</button>
     </div>
 
     <script src="main.js"></script>
 </body>
-        </html>
+</html>
