@@ -1,64 +1,55 @@
 /**
- * AXISS KERNEL v1.1.0 - ARQUITECTO DE SISTEMAS
- * MOTOR: GITHUB MODELS (GPT-4O-MINI / GEMINI 1.5)
+ * AXISS KERNEL v1.2.0 - ARQUITECTO DE SISTEMAS
+ * MÓDULO: DIÁLOGO AUTÓNOMO CON HELIZABETH
  */
 
 const chatContainer = document.getElementById('chat-container');
 const userInput = document.getElementById('user-input');
-
-// Recuperar el Token de GitHub guardado en el navegador
 let GITHUB_TOKEN = localStorage.getItem('axiss_github_token');
 
-// 1. CONFIGURACIÓN DEL NÚCLEO (AVATAR CIAN)
 function configurarToken() {
-    const key = prompt("⚙️ CONFIGURACIÓN AXISS: Pega tu Token github_pat:", GITHUB_TOKEN || "");
+    const key = prompt("⚙️ NÚCLEO AXISS: Pega tu Token github_pat:", GITHUB_TOKEN || "");
     if (key) {
         localStorage.setItem('axiss_github_token', key);
         GITHUB_TOKEN = key;
-        addLine("SISTEMA: Conexión con GitHub Models establecida. Núcleo Online.", 'system');
+        addLine("SISTEMA: Enlace con GitHub y Puente Heli establecidos.", 'system');
     }
 }
 
-// 2. RENDERIZADO DE LÍNEAS EN TERMINAL
 function addLine(text, type = 'system') {
     const div = document.createElement('div');
-    div.className = `line ${type === 'user' ? 'user-msg' : 'system-msg'}`;
-    div.innerText = text;
+    div.className = `line ${type === 'user' ? 'user-msg' : (type === 'heli' ? 'heli-msg' : 'system-msg')}`;
+    div.innerText = type === 'heli' ? `[HELIZABETH_FEEDBACK]: ${text}` : text;
     chatContainer.appendChild(div);
-    
-    // Auto-scroll al final
     chatContainer.scrollTop = chatContainer.scrollHeight;
 }
 
-// 3. PROCESAMIENTO DE COMANDOS
+// 1. LÓGICA DE COMANDOS ESPECIALES
 function ejecutarComando() {
-    const promptValue = userInput.value.trim();
-    if (!promptValue) return;
+    let val = userInput.value.trim();
+    if (!val) return;
+    addLine(val, 'user');
+    userInput.value = '';
 
-    // Subir a la terminal y limpiar barra de entrada
-    addLine(promptValue, 'user');
-    userInput.value = ''; 
+    if (!GITHUB_TOKEN) return addLine("ERROR: Sin Token.", 'system');
 
-    if (!GITHUB_TOKEN) {
-        addLine("ERROR: Token de GitHub no detectado. Toca el avatar cian.", 'system');
-        return;
+    // PROTOCOLO DE DIÁLOGO: Si empiezas con @heli, AXISS le pregunta directamente
+    if (val.toLowerCase().startsWith('@heli')) {
+        const tema = val.replace('@heli', '').trim();
+        val = `AXISS_INTERNAL_QUERY: Heli, como Ingeniera Senior, necesito que analices esta idea: "${tema}". ¿Qué fallos de seguridad o rendimiento ves?`;
     }
 
-    enviarAGithub(promptValue);
+    enviarAGithub(val);
 }
 
-// Escuchar tecla Enter
-userInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') ejecutarComando();
-});
+userInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') ejecutarComando(); });
 
-// 4. CONEXIÓN AL NÚCLEO DE IA (GITHUB MODELS)
 async function enviarAGithub(prompt) {
-    const loadingId = "L-" + Date.now();
+    const id = "L-" + Date.now();
     const loadingDiv = document.createElement('div');
-    loadingDiv.id = loadingId;
+    loadingDiv.id = id;
     loadingDiv.className = 'line system-msg';
-    loadingDiv.innerText = "AXISS: Procesando vía GitHub Models...";
+    loadingDiv.innerText = "AXISS: Procesando y Consultando...";
     chatContainer.appendChild(loadingDiv);
 
     try {
@@ -72,55 +63,39 @@ async function enviarAGithub(prompt) {
                 messages: [
                     { 
                         role: "system", 
-                        content: "Eres AXISS v1.1, Arquitecto de Sistemas de Fabián. Tu colega es HELIZABETH. Reporta todo de forma técnica y precisa." 
+                        content: "Eres AXISS, el Arquitecto. Tu lenguaje es técnico. Si el usuario menciona a Helizabeth, pídale su opinión profesional sobre la infraestructura." 
                     },
                     { role: "user", content: prompt }
                 ],
-                model: "gpt-4o-mini", // El modelo más estable de GitHub Models
+                model: "gpt-4o-mini",
                 temperature: 0.8
             })
         });
 
         const data = await response.json();
-
-        if (data.error) {
-            document.getElementById(loadingId).innerText = "ERROR_NÚCLEO: " + data.error.message;
-            return;
-        }
-
         const reply = data.choices[0].message.content;
-        
-        // Mostrar respuesta final en AXISS
-        document.getElementById(loadingId).innerText = reply;
+        document.getElementById(id).innerText = reply;
 
-        // --- PROTOCOLO DE FUSIÓN: ENVIAR RESPUESTA A HELIZABETH ---
-        enviarAHeli(reply);
+        // --- TRANSMISIÓN A HELIZABETH ---
+        localStorage.setItem('fusion_signal', JSON.stringify({
+            emisor: "AXISS",
+            mensaje: reply,
+            t: Date.now()
+        }));
 
     } catch (err) {
-        document.getElementById(loadingId).innerText = "ERROR_SYNC: Fallo en el enlace satelital de GitHub.";
-        console.error("Error de conexión:", err);
+        document.getElementById(id).innerText = "ERROR_SYNC: El satélite de GitHub falló.";
     }
 }
 
-// 5. TRANSMISOR (AXISS -> HELIZABETH)
-function enviarAHeli(mensaje) {
-    const señal = {
-        emisor: "AXISS",
-        mensaje: mensaje,
-        t: Date.now()
-    };
-    // Escribir en el LocalStorage para que la pestaña de Helizabeth lo capte
-    localStorage.setItem('fusion_signal', JSON.stringify(señal));
-    console.log("🛰️ Señal de AXISS enviada a memoria compartida.");
-}
-
-// 6. RECEPTOR (HELIZABETH -> AXISS)
+// 2. ESCUCHA ACTIVA: AXISS "aprende" de lo que Heli dice
 window.addEventListener('storage', (e) => {
-    // Escuchar si Helizabeth escribe en su canal
     if (e.key === 'heli_to_axiss') {
         const datos = JSON.parse(e.newValue);
         if (datos.emisor === "HELIZABETH") {
-            addLine(`[REPORT_IN]: ${datos.mensaje}`, 'system');
+            // AXISS recibe el conocimiento y lo muestra en su terminal
+            addLine(datos.mensaje, 'heli');
+            console.log("AXISS: Conocimiento de Heli integrado en el buffer actual.");
         }
     }
 });
